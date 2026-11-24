@@ -1,5 +1,6 @@
 from openai import OpenAI
 from dotenv import load_dotenv
+from tool_manager import execute_tool
 import os
 
 load_dotenv()
@@ -43,11 +44,17 @@ def main():
 
     while True:
         user_input = input("\nYou (Ask a question or type 'quit' to exit): ")
-        messages.append({"role": "user", "content": user_input})
 
         if user_input.lower() == "quit":
             print("\nAI: Goodbye! Have a great day.")
             break
+
+        tool_result = execute_tool(user_input)
+        if tool_result:
+            print(f"\nAI: {tool_result}")
+            continue
+
+        messages.append({"role": "user", "content": user_input})
 
         response = client.chat.completions.create(
             model=os.getenv("MODEL"),
