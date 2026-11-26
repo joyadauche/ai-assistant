@@ -1,6 +1,7 @@
 from openai import OpenAI
 from dotenv import load_dotenv
 from tool_manager import execute_tool
+from tools import read_text_file
 import os
 
 load_dotenv()
@@ -44,10 +45,55 @@ def main():
 
     while True:
         user_input = input("\nYou (Ask a question or type 'quit' to exit): ")
+        transformed_user_input = user_input.lower()
 
-        if user_input.lower() == "quit":
+        if transformed_user_input == "quit":
             print("\nAI: Goodbye! Have a great day.")
             break
+
+        if transformed_user_input.startswith("summarize"):
+            filename = transformed_user_input[10:].strip()
+            file_content = read_text_file("data/"+filename)
+
+            prompt = f"""
+            Summarize the following document.
+            Document: {file_content}
+            """
+
+            response = client.chat.completions.create(
+                      model=os.getenv("MODEL"),
+                      messages=[
+                          {"role": "system", "content": roles.get(choice, "You're a helpful AI Assistant.")},
+                          {"role": "user", "content": prompt}
+                      ]
+            )
+            print(response.choices[0].message.content)
+            continue
+
+        if transformed_user_input.startswith("ask"):
+            splitted_user_input = transformed_user_input.split(maxsplit=2)
+            file_content = read_text_file("data/"+splitted_user_input[1])
+            question = splitted_user_input[2]
+            
+            prompt = f"""
+            You are given a document. Answer the user's question 
+            using only the information present in the document.
+            If the answer is not available, say:
+            'I couldn't find that information in the document.'
+            Document: {file_content}
+            Question: {question}
+            """
+
+            response = client.chat.completions.create(
+                      model=os.getenv("MODEL"),
+                      messages=[
+                          {"role": "system", "content": roles.get(choice, "You're a helpful AI Assistant.")},
+                          {"role": "user", "content": prompt}
+                      ]
+            )
+            print(response.choices[0].message.content)
+            continue
+
 
         tool_result = execute_tool(user_input)
         if tool_result:

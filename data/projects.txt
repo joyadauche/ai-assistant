@@ -1,0 +1,6 @@
+Project Name: Distribution Management System
+Project Duration: January 2026 to June 2026
+Programming Language: Python
+Database: SQLite
+Team Members: Obi, Dami, Musa
+The objective of the project was to automate distribution Management using artificial intelligence
